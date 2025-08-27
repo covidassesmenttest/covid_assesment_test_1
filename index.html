@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COVID Risk Assessment Calculator</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; min-height: 100vh; padding: 20px; }
+    .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); overflow: hidden; }
+    .header { background: #2563eb; color: white; padding: 30px; text-align: center; }
+    .header h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 700; }
+    .header p { font-size: 1.1rem; opacity: 0.9; }
+    .content { padding: 40px 30px; }
+    .category { margin-bottom: 35px; border: 2px solid #f1f3f4; border-radius: 12px; padding: 25px; transition: all 0.3s ease; }
+    .category:hover { border-color: #2563eb; box-shadow: 0 5px 15px rgba(37, 99, 235, 0.1); }
+    .category-title { font-size: 1.4rem; font-weight: 600; color: #2d3748; margin-bottom: 15px; }
+    .category-subtitle { font-size: 1.1rem; font-weight: 500; color: #6b7280; margin-bottom: 20px; }
+    .checkbox-item { display: flex; flex-direction: column; margin-bottom: 15px; padding: 12px; border-radius: 8px; transition: background-color 0.2s ease; }
+    .checkbox-item:hover { background-color: #f8f9fa; }
+    .checkbox-label { display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 1rem; }
+    .checkbox-label input[type="checkbox"] { width: 20px; height: 20px; margin-right: 12px; accent-color: #2563eb; cursor: pointer; }
+    .checkbox-info { font-size: 0.85rem; color: #6b7280; margin-top: 4px; line-height: 1.4; padding-left: 32px;}
+    .incident-counter { display: none; align-items: center; gap: 8px; margin-left: 32px; }
+    .counter-btn { background: #2563eb; color: white; border: none; border-radius: 4px; width: 24px; height: 24px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .counter-btn:hover { background: #1d4ed8; }
+    .counter-display { min-width: 20px; text-align: center; font-weight: 500; }
+    .mask-options { display: none; margin-left: 35px; margin-top: 8px; }
+    .mask-options label { display: block; font-size: 0.9rem; margin-bottom: 4px; cursor: pointer; }
+    .mask-toggle { margin-bottom: 20px; padding: 15px; border: 2px solid #f1f3f4; border-radius: 12px; background: #fafafa; cursor: pointer; }
+    .results { background: #374151; color: white; padding: 30px; border-radius: 12px; margin-top: 30px; text-align: center; display: none; }
+    .submit-btn { background: #2563eb; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 1.1rem; cursor: pointer; margin-top: 30px; width: 100%; transition: all 0.2s ease; font-weight: 600; }
+    .submit-btn:hover { background: #1d4ed8; transform: translateY(-2px); }
+    .score-display { font-size: 3rem; font-weight: 700; margin-bottom: 15px; }
+    .risk-level { font-size: 1.5rem; font-weight: 600; margin-bottom: 15px; }
+    .recommendation { font-size: 1.1rem; opacity: 0.95; line-height: 1.6; }
+    .reset-btn { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1rem; cursor: pointer; margin-top: 20px; transition: all 0.2s ease; }
+    .reset-btn:hover { background: #1d4ed8; transform: translateY(-2px); }
+    .form-container.hidden { display: none; }
+    .results.show { display: block; animation: slideIn 0.5s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 768px) { body { padding: 10px; } .content { padding: 30px 20px; } .header h1 { font-size: 1.8rem; } .category { padding: 20px 15px; } .category-title { font-size: 1.2rem; } }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>T.R.A.C.E.</h1>
+        <p>SARS-CoV-2 Exposure Risk Self-Assessment</p>
+    </div>
+
+    <div class="content">
+        <div class="form-container" id="formContainer">
+            <form id="riskForm">
+
+                <div class="mask-toggle">
+                    <input type="checkbox" id="showMasks">
+                    <label for="showMasks"><strong>Show masking options</strong></label>
+                </div>
+
+                <div class="category">
+                    <div class="category-title">Recent illness/exposure</div>
+                    <div class="category-subtitle">Do you have:</div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="current_symptoms" value="5">
+                                <span>Covid-19 symptoms currently</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-info">(e.g. Fever or chills, Cough, Shortness of breath, Sore throat, Congestion, New loss of taste/smell, Fatigue, Body aches)</div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_current_symptoms" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_current_symptoms" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_current_symptoms" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_current_symptoms" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="household_sick" value="4">
+                                <span>Someone you live with who is sick</span>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_household_sick" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_household_sick" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_household_sick" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_household_sick" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="sick_contacts" value="3">
+                                <span>Any sick contacts in past 5 days</span>
+                            </div>
+                            <div class="incident-counter" data-counter="sick_contacts">
+                                <button type="button" class="counter-btn" onclick="adjustCounter('sick_contacts', -1)">−</button>
+                                <span class="counter-display">1</span>
+                                <button type="button" class="counter-btn" onclick="adjustCounter('sick_contacts', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_sick_contacts" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_sick_contacts" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_sick_contacts" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_sick_contacts" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <div class="category-title">Travel</div>
+                    <div class="category-subtitle">In the past 7 days have you:</div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="long_trains" value="6">
+                                <span>Traveled via train for >3 hours</span>
+                            </div>
+                            <div class="incident-counter" data-counter="long_trains">
+                                <button type="button" class="counter-btn" onclick="adjustCounter('long_trains', -1)">−</button>
+                                <span class="counter-display">1</span>
+                                <button type="button" class="counter-btn" onclick="adjustCounter('long_trains', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_long_trains" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_long_trains" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_long_trains" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_long_trains" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="air_travel" value="5">
+                                <span>Traveled via plane</span>
+                            </div>
+                            <div class="incident-counter" data-counter="air_travel">
+                                <button type="button" class="counter-btn" onclick="adjustCounter('air_travel', -1)">−</button>
+                                <span class="counter-display">1</span>
+                                <button type="button" class="counter-btn" onclick="adjustCounter('air_travel', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_air_travel" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_air_travel" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_air_travel" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_air_travel" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="public_transit" value="4">
+                                <span>Traveled via buses / subway</span>
+                            </div>
+                            <div class="incident-counter" data-counter="public_transit">
+                                <button type="button" class="counter-btn" onclick="adjustCounter('public_transit', -1)">−</button>
+                                <span class="counter-display">1</span>
+                                <button type="button" class="counter-btn" onclick="adjustCounter('public_transit', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_public_transit" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_public_transit" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_public_transit" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_public_transit" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="ride_shares" value="3">
+                                <span>Taken ride shares/taxis</span>
+                            </div>
+                            <div class="incident-counter" data-counter="ride_shares">
+                                <button type="button" class="counter-btn" onclick="adjustCounter('ride_shares', -1)">−</button>
+                                <span class="counter-display">1</span>
+                                <button type="button" class="counter-btn" onclick="adjustCounter('ride_shares', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_ride_shares" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_ride_shares" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_ride_shares" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_ride_shares" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="cruise_ships" value="8">
+                                <span>Been on a cruise ship</span>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_cruise_ships" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_cruise_ships" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_cruise_ships" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_cruise_ships" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <div class="category-title">Activities</div>
+                    <div class="category-subtitle">In the past 7 days have you:</div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="healthcare_visit" value="4">
+                                <span>Visited a healthcare setting</span>
+                            </div>
+                            <div class="incident-counter" data-counter="healthcare_visit">
+                                <button type="button" class="counter-btn" onclick="adjustCounter('healthcare_visit', -1)">−</button>
+                                <span class="counter-display">1</span>
+                                <button type="button" class="counter-btn" onclick="adjustCounter('healthcare_visit', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_healthcare_visit" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_healthcare_visit" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_healthcare_visit" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_healthcare_visit" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="indoor_dining" value="3">
+                                <span>Dined indoors</span>
+                            </div>
+                            <div class="incident-counter" data-counter="indoor_dining">
+                                <button type="button" class="counter-btn" onclick="adjustCounter('indoor_dining', -1)">−</button>
+                                <span class="counter-display">1</span>
+                                <button type="button" class="counter-btn" onclick="adjustCounter('indoor_dining', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="checkbox-info">Restaurants, cafes, bars, etc.</div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_indoor_dining" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_indoor_dining" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_indoor_dining" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_indoor_dining" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="large_gathering" value="3">
+                                <span>Attended a large indoor gathering</span>
+                            </div>
+                            <div class="incident-counter" data-counter="large_gathering">
+                                <button type="button" class="counter-btn" onclick="adjustCounter('large_gathering', -1)">−</button>
+                                <span class="counter-display">1</span>
+                                <button type="button" class="counter-btn" onclick="adjustCounter('large_gathering', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="checkbox-info">Parties, concerts, conferences, weddings, etc.</div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_large_gathering" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_large_gathering" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_large_gathering" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_large_gathering" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="hotels" value="2">
+                                <span>Had any hotel/overnight stays</span>
+                            </div>
+                            <div class="incident-counter" data-counter="hotels">
+                                <button type="button" class="counter-btn" onclick="adjustCounter('hotels', -1)">−</button>
+                                <span class="counter-display">1</span>
+                                <button type="button" class="counter-btn" onclick="adjustCounter('hotels', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_hotels" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_hotels" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_hotels" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_hotels" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category">
+                    <div class="category-title">Close contact patterns</div>
+                    <div class="category-subtitle">Do you:</div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="public_work" value="1">
+                                <span>Work with public daily</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-info">Retail, service industry, healthcare, education, etc.</div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_public_work" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_public_work" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_public_work" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_public_work" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="school_kids" value="1">
+                                <span>Live with school-age kids</span>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_school_kids" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_school_kids" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_school_kids" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_school_kids" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Calculate Risk Score</button>
+            </form>
+        </div>
+
+        <div class="results" id="results">
+            <div class="score-display" id="scoreDisplay">0</div>
+            <div class="risk-level" id="riskLevel">Low Risk</div>
+            <div class="recommendation" id="recommendation">Complete the assessment above</div>
+            <button type="button" class="reset-btn" onclick="resetForm()">Take Assessment Again</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const form = document.getElementById('riskForm');
+const formContainer = document.getElementById('formContainer');
+const results = document.getElementById('results');
+const scoreDisplay = document.getElementById('scoreDisplay');
+const riskLevel = document.getElementById('riskLevel');
+const recommendation = document.getElementById('recommendation');
+const showMasksToggle = document.getElementById('showMasks');
+
+// Track counters
+const counters = {};
+
+// Initialize counters and add checkbox listeners
+document.addEventListener('DOMContentLoaded', () => {
+    const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        const counterId = checkbox.id;
+        const counterEl = document.querySelector(`.incident-counter[data-counter="${counterId}"]`);
+        
+        if (counterEl) {
+            counters[counterId] = 1;
+            checkbox.addEventListener('change', () => {
+                counterEl.style.display = checkbox.checked ? 'flex' : 'none';
+                if (!checkbox.checked) {
+                    counters[counterId] = 1;
+                    counterEl.querySelector('.counter-display').textContent = '1';
+                }
+            });
+        }
+    });
+});
+
+showMasksToggle.addEventListener('change', () => {
+    const maskOptions = document.querySelectorAll('.mask-options');
+    maskOptions.forEach(div => div.style.display = showMasksToggle.checked ? 'block' : 'none');
+});
+
+function adjustCounter(counterId, delta) {
+    if (!counters[counterId]) counters[counterId] = 1;
+    counters[counterId] = Math.max(1, counters[counterId] + delta);
+    
+    const counterDisplay = document.querySelector(`.incident-counter[data-counter="${counterId}"] .counter-display`);
+    if (counterDisplay) {
+        counterDisplay.textContent = counters[counterId];
+    }
+}
+
+function calculateScore(event) {
+    event.preventDefault();
+    let totalScore = 0;
+    const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+    
+    checkboxes.forEach(cb => {
+        if (cb.id === 'showMasks') return; // Skip the mask toggle
+        
+        let score = parseInt(cb.value, 10);
+        
+        // Apply incident counter multiplier
+        const counterId = cb.id;
+        if (counters[counterId]) {
+            score *= counters[counterId];
+        }
+        
+        // Apply mask reduction
+        if(showMasksToggle.checked) {
+            const maskName = 'mask_' + cb.id;
+            const maskRadios = form.querySelectorAll(`input[name="${maskName}"]`);
+            maskRadios.forEach(radio => {
+                if(radio.checked){
+                    switch(radio.value){
+                        case 'n95': score *= 0.2; break;
+                        case 'surgical': score *= 0.4; break;
+                        case 'cloth': score *= 0.5; break;
+                        default: break;
+                    }
+                }
+            });
+        }
+        totalScore += score;
+    });
+
+    updateResults(totalScore);
+    showResults();
+}
+
+function updateResults(score) {
+    scoreDisplay.textContent = Math.round(score);
+    if(score <= 2){
+        riskLevel.textContent = 'Low Risk';
+        recommendation.textContent = 'Normal contact OK';
+        results.style.background = '#059669';
+    } else if(score <= 5){
+        riskLevel.textContent = 'Moderate Risk';
+        recommendation.textContent = 'Outdoor visits preferred, indoor with masks/ventilation';
+        results.style.background = '#d97706';
+    } else if(score <= 7){
+        riskLevel.textContent = 'High Risk';
+        recommendation.textContent = 'Wait 5-7 days OR negative PCR test';
+        results.style.background = '#dc2626';
+    } else{
+        riskLevel.textContent = 'Very High Risk';
+        recommendation.textContent = 'Wait 10 days regardless';
+        results.style.background = '#991b1b';
+    }
+}
+
+function showResults() {
+    formContainer.classList.add('hidden');
+    results.classList.add('show');
+}
+
+function resetForm() {
+    form.reset();
+    
+    // Reset all counters
+    Object.keys(counters).forEach(counterId => {
+        counters[counterId] = 1;
+        const counterDisplay = document.querySelector(`.incident-counter[data-counter="${counterId}"] .counter-display`);
+        if (counterDisplay) {
+            counterDisplay.textContent = '1';
+        }
+    });
+    
+    // Hide all incident counters
+    const counterElements = document.querySelectorAll('.incident-counter');
+    counterElements.forEach(el => el.style.display = 'none');
+    
+    formContainer.classList.remove('hidden');
+    results.classList.remove('show');
+    results.style.display = 'none';
+}
+
+form.addEventListener('submit', calculateScore);
+</script>
+</body>
+</html>
