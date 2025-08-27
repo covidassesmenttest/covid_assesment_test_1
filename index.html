@@ -45,7 +45,7 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>T.R.A.C.E.</h1>
+        <h1>T.R.A.C.</h1>
         <p>SARS-CoV-2 Exposure Risk Self-Assessment</p>
     </div>
 
@@ -56,62 +56,6 @@
                 <div class="mask-toggle">
                     <input type="checkbox" id="showMasks">
                     <label for="showMasks"><strong>Show masking options</strong></label>
-                </div>
-
-                <div class="category">
-                    <div class="category-title">Recent illness/exposure</div>
-                    <div class="category-subtitle">Do you have:</div>
-                    
-                    <div class="checkbox-item">
-                        <div class="checkbox-label">
-                            <div style="display: flex; align-items: center;">
-                                <input type="checkbox" id="current_symptoms" value="5">
-                                <span>Covid-19 symptoms currently</span>
-                            </div>
-                        </div>
-                        <div class="checkbox-info">(e.g. Fever or chills, Cough, Shortness of breath, Sore throat, Congestion, New loss of taste/smell, Fatigue, Body aches)</div>
-                        <div class="mask-options">
-                            <label><input type="radio" name="mask_current_symptoms" value="none" checked> None</label>
-                            <label><input type="radio" name="mask_current_symptoms" value="n95"> N95/KN95</label>
-                            <label><input type="radio" name="mask_current_symptoms" value="surgical"> Surgical</label>
-                            <label><input type="radio" name="mask_current_symptoms" value="cloth"> Cloth</label>
-                        </div>
-                    </div>
-                    
-                    <div class="checkbox-item">
-                        <div class="checkbox-label">
-                            <div style="display: flex; align-items: center;">
-                                <input type="checkbox" id="household_sick" value="4">
-                                <span>Someone you live with who is sick</span>
-                            </div>
-                        </div>
-                        <div class="mask-options">
-                            <label><input type="radio" name="mask_household_sick" value="none" checked> None</label>
-                            <label><input type="radio" name="mask_household_sick" value="n95"> N95/KN95</label>
-                            <label><input type="radio" name="mask_household_sick" value="surgical"> Surgical</label>
-                            <label><input type="radio" name="mask_household_sick" value="cloth"> Cloth</label>
-                        </div>
-                    </div>
-                    
-                    <div class="checkbox-item">
-                        <div class="checkbox-label">
-                            <div style="display: flex; align-items: center;">
-                                <input type="checkbox" id="sick_contacts" value="3">
-                                <span>Any sick contacts in past 5 days</span>
-                            </div>
-                            <div class="incident-counter" data-counter="sick_contacts">
-                                <button type="button" class="counter-btn" onclick="adjustCounter('sick_contacts', -1)">−</button>
-                                <span class="counter-display">1</span>
-                                <button type="button" class="counter-btn" onclick="adjustCounter('sick_contacts', 1)">+</button>
-                            </div>
-                        </div>
-                        <div class="mask-options">
-                            <label><input type="radio" name="mask_sick_contacts" value="none" checked> None</label>
-                            <label><input type="radio" name="mask_sick_contacts" value="n95"> N95/KN95</label>
-                            <label><input type="radio" name="mask_sick_contacts" value="surgical"> Surgical</label>
-                            <label><input type="radio" name="mask_sick_contacts" value="cloth"> Cloth</label>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="category">
@@ -213,6 +157,62 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="category">
+                    <div class="category-title">Recent illness/exposure</div>
+                    <div class="category-subtitle">Do you have:</div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="current_symptoms" value="5">
+                                <span>Covid-19 symptoms currently</span>
+                            </div>
+                        </div>
+                        <div class="checkbox-info">(e.g. Fever or chills, Cough, Shortness of breath, Sore throat, Congestion, New loss of taste/smell, Fatigue, Body aches)</div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_current_symptoms" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_current_symptoms" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_current_symptoms" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_current_symptoms" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="household_sick" value="4">
+                                <span>Someone you live with who is sick</span>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_household_sick" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_household_sick" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_household_sick" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_household_sick" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-item">
+                        <div class="checkbox-label">
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" id="sick_contacts" value="3">
+                                <span>Any sick contacts in past 5 days</span>
+                            </div>
+                            <div class="incident-counter" data-counter="sick_contacts">
+                                <button type="button" class="counter-btn" onclick="adjustCounter('sick_contacts', -1)">−</button>
+                                <span class="counter-display">1</span>
+                                <button type="button" class="counter-btn" onclick="adjustCounter('sick_contacts', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="mask-options">
+                            <label><input type="radio" name="mask_sick_contacts" value="none" checked> None</label>
+                            <label><input type="radio" name="mask_sick_contacts" value="n95"> N95/KN95</label>
+                            <label><input type="radio" name="mask_sick_contacts" value="surgical"> Surgical</label>
+                            <label><input type="radio" name="mask_sick_contacts" value="cloth"> Cloth</label>
+                        </div>
+                    </div>
+                </div>               
 
                 <div class="category">
                     <div class="category-title">Activities</div>
